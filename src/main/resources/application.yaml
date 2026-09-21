@@ -75,3 +75,10 @@ info:
   multipart:
     max-file-size: ${spring.servlet.multipart.max-file-size}
     max-request-size: ${spring.servlet.multipart.max-request-size}
+
+  discodeit:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      access-token-validity: 30m
+      refresh-token-validity: 14d
+      issuer: discodeit
