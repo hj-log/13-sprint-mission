@@ -60,7 +60,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/csrf-token",
                                 "/api/auth/login",
-                                "/api/auth/logout"
+                                "/api/auth/logout",
+                                "/api/auth/refresh"
                         ).permitAll()
 
                         .requestMatchers(

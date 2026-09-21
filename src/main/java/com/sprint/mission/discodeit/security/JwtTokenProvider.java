@@ -264,4 +264,10 @@ public class JwtTokenProvider {
 
         return username;
     }
+
+    public JWTClaimsSet parseRefreshToken(String token) {
+        JWTClaimsSet claims = parseClaims(token);
+        validateTokenType(claims, REFRESH_TOKEN_TYPE);
+        return claims;
+    }
 }
