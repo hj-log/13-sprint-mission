@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.config;
 
+import com.sprint.mission.discodeit.security.JwtLoginSuccessHandler;
 import com.sprint.mission.discodeit.security.LoginFailureHandler;
 import com.sprint.mission.discodeit.security.LoginSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,6 +16,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -38,9 +40,8 @@ public class SecurityConfig {
             HttpSecurity http,
             LoginSuccessHandler loginSuccessHandler,
             LoginFailureHandler loginFailureHandler,
-            SessionRegistry sessionRegistry,
-            UserDetailsService userDetailsService
-    ) throws Exception {
+            UserDetailsService userDetailsService,
+            JwtLoginSuccessHandler jwtLoginSuccessHandler) throws Exception {
 
         http
                 .csrf(csrf -> csrf
@@ -52,13 +53,9 @@ public class SecurityConfig {
                         )
                 )
 
-                .sessionManagement(session -> session
-                        .sessionConcurrency(concurrency -> concurrency
-                                .maximumSessions(1)
-                                .maxSessionsPreventsLogin(false)
-                                .sessionRegistry(sessionRegistry)
-                        )
-                )
+                .sessionManagement(sesstion -> sesstion
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/csrf-token",
@@ -90,7 +87,7 @@ public class SecurityConfig {
 
                 .formLogin(login -> login
                         .loginProcessingUrl("/api/auth/login")
-                        .successHandler(loginSuccessHandler)
+                        .successHandler(jwtLoginSuccessHandler)
                         .failureHandler(loginFailureHandler)
                         .permitAll()
                 )
