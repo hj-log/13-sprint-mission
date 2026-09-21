@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.config;
 
+import com.sprint.mission.discodeit.security.JwtAuthenticationFilter;
 import com.sprint.mission.discodeit.security.JwtLoginSuccessHandler;
 import com.sprint.mission.discodeit.security.LoginFailureHandler;
-import com.sprint.mission.discodeit.security.LoginSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -19,10 +19,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -38,10 +38,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(
             HttpSecurity http,
-            LoginSuccessHandler loginSuccessHandler,
+            JwtLoginSuccessHandler jwtLoginSuccessHandler,
             LoginFailureHandler loginFailureHandler,
-            UserDetailsService userDetailsService,
-            JwtLoginSuccessHandler jwtLoginSuccessHandler) throws Exception {
+            JwtAuthenticationFilter jwtAuthenticationFilter
+    ) throws Exception {
 
         http
                 .csrf(csrf -> csrf
@@ -53,7 +53,7 @@ public class SecurityConfig {
                         )
                 )
 
-                .sessionManagement(sesstion -> sesstion
+                .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
@@ -92,19 +92,10 @@ public class SecurityConfig {
                         .permitAll()
                 )
 
-                .rememberMe(remember -> remember
-                        .userDetailsService((userDetailsService))
-                        .rememberMeParameter("remember-me")
-                        .rememberMeCookieName("remember-me")
-                        .tokenValiditySeconds(7 * 24 * 60 * 60)
-                        .key("discodeit-remember-me-key")
-                )
-
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
-                        .invalidateHttpSession(true)
                         .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID", "remember-me")
+                        .deleteCookies("REFRESH_TOKEN")
                         .logoutSuccessHandler(
                                 new HttpStatusReturningLogoutSuccessHandler(
                                         HttpStatus.NO_CONTENT
@@ -126,6 +117,11 @@ public class SecurityConfig {
                                         "접근 권한이 없습니다."
                                 )
                         )
+                )
+
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
                 );
 
         return http.build();

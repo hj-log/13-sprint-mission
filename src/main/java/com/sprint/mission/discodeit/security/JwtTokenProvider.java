@@ -63,6 +63,11 @@ public class JwtTokenProvider {
 
     public String createAccessToken(UUID userId, String username, Role role) {
 
+        Objects.requireNonNull(
+                role,
+                "Access Token의 사용자 권한은 필수입니다."
+        );
+
         return  createToken(
                 userId,
                 username,
@@ -88,7 +93,7 @@ public class JwtTokenProvider {
         validateTokenType(claims, REFRESH_TOKEN_TYPE);
 
         UUID userId = getUserId(claims);
-        String username = claims.getSubject();
+        String username = getUsername(claims);
 
         return createAccessToken(
                 userId,
@@ -107,6 +112,11 @@ public class JwtTokenProvider {
         Objects.requireNonNull(userId, "사용자의 ID는 필수입니다.");
         Objects.requireNonNull(username, "사용자 이름은 필수입니다.");
         Objects.requireNonNull(validity, "토큰 유효시간은 필수입니다.");
+        if (username.isBlank()) {
+            throw new IllegalArgumentException(
+                    "사용자 이름은 비어 있을 수 없습니다."
+            );
+        }
 
         Instant issuedAt = clock.instant();
         Instant expiresAt = issuedAt.plus(validity);
@@ -173,7 +183,8 @@ public class JwtTokenProvider {
 
             Date expirationTime =
                     claims.getExpirationTime();
-            if (!(expirationTime == null) || expirationTime.toInstant().isAfter(clock.instant())) {
+            if (expirationTime == null
+                    || !expirationTime.toInstant().isAfter(clock.instant())) {
                 throw new IllegalArgumentException("JWT가 만료되었습니다.");
             }
 
@@ -236,4 +247,21 @@ public class JwtTokenProvider {
         return properties.getRefreshTokenValidity().toSeconds();
     }
 
+    public JWTClaimsSet parseAccessToken(String token) {
+        JWTClaimsSet claims = parseClaims(token);
+        validateTokenType(claims, ACCESS_TOKEN_TYPE);
+        return claims;
+    }
+
+    public String getUsername(JWTClaimsSet claims) {
+        String username = claims.getSubject();
+
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException(
+                    "JWT에 사용자 이름이 없습니다."
+            );
+        }
+
+        return username;
+    }
 }
