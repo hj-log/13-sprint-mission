@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -208,6 +209,24 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(exception.getStatusCode())
+                .body(response);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(
+            NoResourceFoundException exception
+    ) {
+        ErrorResponse response = new ErrorResponse(
+                Instant.now(),
+                "RESOURCE_NOT_FOUND",
+                "요청한 리소스를 찾을 수 없습니다.",
+                Map.of(),
+                exception.getClass().getSimpleName(),
+                HttpStatus.NOT_FOUND.value()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
                 .body(response);
     }
 
