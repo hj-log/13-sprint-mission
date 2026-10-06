@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class NotificationRequiredEventListener {
             phase = TransactionPhase.AFTER_COMMIT
     )
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Async("taskExecutor")
     public void on(MessageCreatedEvent event) {
         Message message = messageRepository.findById(event.messageId())
                 .orElseThrow(()-> new MessageNotFoundException(event.messageId()));
@@ -58,6 +60,7 @@ public class NotificationRequiredEventListener {
             phase = TransactionPhase.AFTER_COMMIT
     )
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Async("taskExecutor")
     public void on(RoleUpdatedEvent event) {
         String title = "권한이 변경되었습니다.";
 

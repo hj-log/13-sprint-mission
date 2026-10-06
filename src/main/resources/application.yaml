@@ -49,7 +49,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,loggers
+        include: health,metrics
+  observations:
+    annotations:
+      enabled: true
 
   endpoint:
     health:
