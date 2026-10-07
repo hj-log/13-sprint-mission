@@ -45,7 +45,7 @@ public class AsyncConfig {
         };
     }
 
-    @Bean(name = "taskExecutor")
+    @Bean(name = {"taskExecutor", "eventTaskExecutor"})
     public Executor taskExecutor(
             TaskDecorator contextCopyingTaskDecorator
     ) {

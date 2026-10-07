@@ -8,7 +8,6 @@ import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
@@ -16,7 +15,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 
-@Component
 @RequiredArgsConstructor
 public class NotificationRequiredEventListener {
 
