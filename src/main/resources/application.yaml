@@ -1,14 +1,22 @@
 spring:
   application:
     name: discodeit
+
   cache:
-    type: caffeine
+    type: redis
     cache-names:
       - channelsByUser
       - notificationsByUser
       - users
-    caffeine:
-      spec: maximumSize=100,expireAfterAccess=600s,recordStats
+    redis:
+      enable-statistics: true
+      time-to-live: 600s
+      cache-null-values: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
   profiles:
     active: dev
@@ -68,7 +76,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,metrics, caches
+        include: health,metrics,caches
   observations:
     annotations:
       enabled: true
