@@ -11,6 +11,7 @@ import com.sprint.mission.discodeit.security.JwtRegistry;
 import com.sprint.mission.discodeit.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ public class BasicAuthService implements AuthService {
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
+    @CacheEvict(cacheNames = "users", allEntries = true)
     public UserDto updateRole(UUID userId, Role newRole) {
         if (userId == null) {
             throw new IllegalArgumentException(

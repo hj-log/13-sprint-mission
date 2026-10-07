@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -24,6 +26,7 @@ public class JwtLogoutHandler implements LogoutHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtRegistry jwtRegistry;
+    private final CacheManager cacheManager;
 
     @Override
     public void logout(
@@ -72,6 +75,12 @@ public class JwtLogoutHandler implements LogoutHandler {
             );
 
             jwtRegistry.invalidateJwtInformationByUserId(userId);
+
+            Cache usersCache = cacheManager.getCache("users");
+
+            if (usersCache != null) {
+                usersCache.clear();
+            }
 
         } catch (IllegalArgumentException e) {
             log.warn(

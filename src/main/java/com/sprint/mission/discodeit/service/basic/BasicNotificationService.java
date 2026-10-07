@@ -9,6 +9,8 @@ import com.sprint.mission.discodeit.repository.NotificationRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,6 +31,11 @@ public class BasicNotificationService
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(
+            cacheNames = "notificationsByUser",
+            key = "#receiverId",
+            condition = "#receiverId != null"
+    )
     public NotificationDto create(
             UUID receiverId,
             String title,
@@ -58,6 +65,11 @@ public class BasicNotificationService
     }
 
     @Override
+    @Cacheable(
+            cacheNames = "notificationsByUser",
+            key = "#receiverId",
+            condition = "#receiverId != null"
+    )
     public List<NotificationDto> findAllByReceiverId(
             UUID receiverId
     ) {
@@ -77,6 +89,11 @@ public class BasicNotificationService
 
     @Override
     @Transactional
+    @CacheEvict(
+            cacheNames = "notificationsByUser",
+            key = "#requesterId",
+            condition = "#requesterId != null"
+    )
     public void delete(
             UUID notificationId,
             UUID requesterId
