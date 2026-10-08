@@ -17,18 +17,16 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.Duration;
 
 @Component
 @RequiredArgsConstructor
 public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final String REFRESH_TOKEN_COOKIE = "REFRESH_TOKEN";
-
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtRegistry jwtRegistry;
     private final ObjectMapper objectMapper;
     private final CacheManager cacheManager;
+    private final RefreshTokenCookieProvider refreshTokenCookieProvider;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -66,17 +64,12 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
         }
 
         ResponseCookie refreshTokenCookie =
-                ResponseCookie.from(REFRESH_TOKEN_COOKIE, refreshToken)
-                        .httpOnly(true)
-                        .secure(false)
-                        .path("/")
-                        .sameSite("Lax")
-                        .maxAge(
-                                Duration.ofSeconds(jwtTokenProvider.getRefreshTokenExpirationTime()))
-                        .build();
+                refreshTokenCookieProvider.create(refreshToken);
 
         response.addHeader(
-                HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+                HttpHeaders.SET_COOKIE,
+                refreshTokenCookie.toString()
+        );
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

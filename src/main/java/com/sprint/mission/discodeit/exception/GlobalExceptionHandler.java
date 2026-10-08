@@ -182,15 +182,15 @@ public class GlobalExceptionHandler {
             ResponseStatusException exception
     ) {
         int statusValue = exception.getStatusCode().value();
-        HttpStatus httpStatus = HttpStatus.resolve(statusValue);
 
-        String code = httpStatus != null
-                ? httpStatus.name()
-                : "HTTP_ERROR";
+        String code = Optional.ofNullable(
+                        HttpStatus.resolve(statusValue)
+                )
+                .map(HttpStatus::name)
+                .orElse("HTTP_" + statusValue);
 
-        String message = exception.getReason() != null
-                ? exception.getReason()
-                : "요청을 처리할 수 없습니다.";
+        String message = Optional.ofNullable(exception.getReason())
+                .orElse("요청을 처리할 수 없습니다.");
 
         ErrorResponse response = new ErrorResponse(
                 Instant.now(),
